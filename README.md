@@ -8,7 +8,7 @@ You can verify that a function was called with the expected parameters. You can 
 
 Example:
 
-```golang
+```go
 db := GetTestDB()
 defer db.Close()
 
@@ -39,7 +39,7 @@ pgexpect.MockFunction(function, expectedCalls, t, db, func(t *testing.T, db *sql
 
 Example:
 
-```golang
+```go
 db := GetTestDB()
 defer db.Close()
 
