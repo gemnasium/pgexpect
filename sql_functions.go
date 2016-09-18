@@ -111,7 +111,7 @@ func validateCalls(calls []map[string]interface{}, expectedCalls []Call, args []
 			switch v := expectedCalls[callIndex].Values[argIndex].(type) {
 			case string:
 				expected := expectedCalls[callIndex].Values[argIndex].(string)
-				got := call[arg.Name].(string)
+				got := getString(call[arg.Name], arg.Name, t)
 				if expected != got {
 					t.Errorf("[pgexpect] Wrong value for %s. Expected %s but got %s", arg.Name, expected, got)
 				}
@@ -143,5 +143,18 @@ func validateCalls(calls []map[string]interface{}, expectedCalls []Call, args []
 				t.Fatalf(`[pgexpect] Unknown type "%s" for column %s`, v, arg.Name)
 			}
 		}
+	}
+}
+
+// getString is used to turn []byte/[]uint8 into strings. This happens when using custom types.
+func getString(src interface{}, argName string, t *testing.T) string {
+	switch v := src.(type) {
+	case string:
+		return src.(string)
+	case []uint8:
+		return string(src.([]uint8))
+	default:
+		t.Fatalf(`[pgexpect] Unknown type "%s" for column %s to turn into a string`, v, argName)
+		return ""
 	}
 }
