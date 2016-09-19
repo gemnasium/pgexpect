@@ -108,40 +108,48 @@ func validateCalls(calls []map[string]interface{}, expectedCalls []Call, args []
 	// don't think it will ever be very nice. There is def room for improvement.
 	for callIndex, call := range calls {
 		for argIndex, arg := range args {
-			switch v := expectedCalls[callIndex].Values[argIndex].(type) {
+			switch expected := expectedCalls[callIndex].Values[argIndex].(type) {
 			case string:
-				expected := expectedCalls[callIndex].Values[argIndex].(string)
-				got := call[arg.Name].(string)
+				got := getString(call[arg.Name], arg.Name, t)
 				if expected != got {
 					t.Errorf("[pgexpect] Wrong value for %s. Expected %s but got %s", arg.Name, expected, got)
 				}
 			case uint64:
-				expected := expectedCalls[callIndex].Values[argIndex].(uint64)
 				got := uint64(call[arg.Name].(int64))
 				if expected != got {
 					t.Errorf("[pgexpect] Wrong value for %s. Expected %v but got %v", arg.Name, expected, got)
 				}
 			case int64:
-				expected := expectedCalls[callIndex].Values[argIndex].(int64)
 				got := call[arg.Name].(int64)
 				if expected != got {
 					t.Errorf("[pgexpect] Wrong value for %s. Expected %v but got %v", arg.Name, expected, got)
 				}
 			case int32:
-				expected := expectedCalls[callIndex].Values[argIndex].(int32)
 				got := call[arg.Name].(int32)
 				if expected != got {
 					t.Errorf("[pgexpect] Wrong value for %s. Expected %v but got %v", arg.Name, expected, got)
 				}
 			case []uint8:
-				expected := expectedCalls[callIndex].Values[argIndex].([]uint8)
 				got := call[arg.Name].([]uint8)
 				if !reflect.DeepEqual(expected, got) {
 					t.Errorf("[pgexpect] Wrong value for %s. Expected %v but got %v", arg.Name, string(expected), string(got))
 				}
 			default:
-				t.Fatalf(`[pgexpect] Unknown type "%s" for column %s`, v, arg.Name)
+				t.Fatalf(`[pgexpect] Unknown type "%s" for column %s`, expected, arg.Name)
 			}
 		}
+	}
+}
+
+// getString is used to turn []byte/[]uint8 into strings. This happens when using custom types.
+func getString(src interface{}, argName string, t *testing.T) string {
+	switch v := src.(type) {
+	case string:
+		return v
+	case []uint8:
+		return string(v)
+	default:
+		t.Fatalf(`[pgexpect] Unknown type "%s" for column %s to turn into a string`, v, argName)
+		return ""
 	}
 }
