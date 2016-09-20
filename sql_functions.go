@@ -12,7 +12,7 @@ import (
 // MockFunction replace a function and expect calls to it
 func MockFunction(function Function, expectedCalls []Call, t *testing.T, db *sqlx.DB, testFunc func(t *testing.T, db *sqlx.DB)) {
 	body := createCallTrackingTable(function.Name, function.Args, t, db)
-	function.Body = function.Body + body // This is not especially nice, but this at least don't overwrite the body someone might pass.
+	function.Body = body + function.Body // This is not especially nice, but this at least don't overwrite the body someone might pass.
 
 	createSQLFunctions(function, t, db)
 	testFunc(t, db)
