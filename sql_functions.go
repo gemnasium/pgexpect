@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -109,6 +110,11 @@ func validateCalls(calls []map[string]interface{}, expectedCalls []Call, args []
 	for callIndex, call := range calls {
 		for argIndex, arg := range args {
 			switch expected := expectedCalls[callIndex].Values[argIndex].(type) {
+			case time.Time:
+				got := call[arg.Name].(time.Time)
+				if expected != got {
+					t.Errorf("[pgexpect] Wrong value for %s. Expected %s but got %s", arg.Name, expected, got)
+				}
 			case string:
 				got := getString(call[arg.Name], arg.Name, t)
 				if expected != got {
@@ -135,7 +141,7 @@ func validateCalls(calls []map[string]interface{}, expectedCalls []Call, args []
 					t.Errorf("[pgexpect] Wrong value for %s. Expected %v but got %v", arg.Name, string(expected), string(got))
 				}
 			default:
-				t.Fatalf(`[pgexpect] Unknown type "%s" for column %s`, expected, arg.Name)
+				t.Fatalf(`[pgexpect] Unknown type for column %s, expected value is %v`, arg.Name, expected)
 			}
 		}
 	}
