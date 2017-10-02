@@ -140,6 +140,11 @@ func validateCalls(calls []map[string]interface{}, expectedCalls []Call, args []
 				if expected != got {
 					t.Errorf("[pgexpect] Wrong value for %s. Expected %v but got %v", arg.Name, expected, got)
 				}
+			case int:
+				got := int(call[arg.Name].(int64))
+				if expected != got {
+					t.Errorf("[pgexpect] Wrong value for %s. Expected %v but got %v", arg.Name, expected, got)
+				}
 			case []uint8:
 				got := call[arg.Name].([]uint8)
 				if !reflect.DeepEqual(expected, got) {
